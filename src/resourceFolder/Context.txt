@@ -1,0 +1,14 @@
+1. create a context 
+export   const dataContext = createContext(null);
+2.wrap the children component with context provider.
+
+<dataContext.provider value={"anamul"}>
+<childrenComponent/>
+</dataContext.provider>
+
+3. access context value
+import {dataContext} from "../"
+
+const contextData = useContext(dataContext);
+
+ 
