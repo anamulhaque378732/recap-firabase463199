@@ -1,46 +1,64 @@
-import { createContext, useState } from "react";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createContext, useState, useEffect } from "react";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, FacebookAuthProvider, onAuthStateChanged, signOut } from "firebase/auth";
 import auth from "../Firebase/firebase.config";
-import { signInWithEmailAndPassword } from "firebase/auth";
+
+
 export const authContext = createContext(null);
 
 
 
 const AuthProvider = ({ children }) => {
+    const [user, setUser] = useState(null);
+    const googleProvider = new GoogleAuthProvider();
+    const facebookProvider = new FacebookAuthProvider();
+
 
     const registerUser = (email, password) => {
-        createUserWithEmailAndPassword(auth, email, password)
-            .then(result => {
-                const user = result.user;
-                console.log(user);
-
-            })
-            .then(error => {
-                console.log(error.message);
-
-            })
-
+        return createUserWithEmailAndPassword(auth, email, password)
 
     };
 
     const loginUser = () => {
-        signInWithEmailAndPassword(auth, email, password)
-            .then(result => {
-                const user = result.user;
-                console.log(user);
+        return signInWithEmailAndPassword(auth, email, password);
+    };
 
-            }).then(error => {
-                console.log(error.message);
+    const googleLogin = () => {
+        return signInWithPopup(auth, googleProvider)
+    };
 
-            })
-    }
+    const facebookLogin = () => {
+        return signInWithPopup(auth, facebookProvider);
+    };
+
+    const logOut = () => {
+        return signOut(auth)
+    };
+
 
     const authInfo = {
         registerUser,
         loginUser,
-    }
+        user, setUser,
+        googleLogin,
+        facebookLogin,
+        signOut, logOut
+    };
 
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, currentUser => {
+            if (currentUser) {
+                setUser(currentUser)
 
+            } else {
+                setUser(null)
+
+            }
+        });
+
+        return () => {
+            unsubscribe();
+        }
+    }, []);
     return (
         <div>
             <authContext.Provider value={authInfo}> {children}</authContext.Provider>
